@@ -50,11 +50,15 @@ contract BelzToken {
         _;
     }
 
+   
+
+   function getBalanceOf (address _wallet) public view returns (uint){
+      return balanceOf[_wallet];
+   }
+
     //transfer token
-    function transfer(
-        address _to,
-        uint256 _amount
-    ) public transferModifier(_amount, _to) returns (bool) {
+    //Transfer lets us transfer value from address of the caller to the _to address
+    function transfer(address _to,uint256 _amount) public transferModifier(_amount, _to) returns (bool) {
         balanceOf[msg.sender] -= _amount;
         balanceOf[_to] += _amount;
         emit Transfer(msg.sender, _to, _amount);
@@ -62,21 +66,14 @@ contract BelzToken {
     }
 
     //approve token
-    function approve(
-        address _spender,
-        uint256 _amount
-    ) public approveMod(_spender) returns (bool success) {
+    function approve(address _spender,uint256 _amount) public approveMod(_spender) returns (bool success) {
         allowance[msg.sender][_spender] = _amount;
         emit Approval(msg.sender, _spender, _amount);
         return true;
     }
 
     //transferFrom function
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public transferFromModifier(_amount, _from, _to) returns (bool success) {
+    function transferFrom(address _from,address _to,uint256 _amount) public transferFromModifier(_amount, _from, _to) returns (bool success) {
         uint256 currentAllowance = allowance[_from][msg.sender];
 
         if (currentAllowance != type(uint256).max) {
@@ -91,10 +88,9 @@ contract BelzToken {
     }
 
     //get allowance remaining
-    function getAllowance(
-        address _owner,
-        address _spender
-    ) public view returns (uint256 remainder) {
+    function getAllowance(address _owner,address _spender) public view returns (uint256 remainder) {
         return allowance[_owner][_spender];
     }
 }
+
+
