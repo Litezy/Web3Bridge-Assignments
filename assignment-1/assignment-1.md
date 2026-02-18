@@ -1,4 +1,3 @@
-```markdown
 # Solidity Data Locations: Quick Guide
 
 ## Three Data Locations
@@ -14,12 +13,15 @@
 ## Structs
 
 ### State Variables (Always Storage)
-```solidity
-struct User { string name; uint256 balance; }
 
-User public admin;  // ✅ storage (implicit)
+```solidity
+struct User { 
+    string name; 
+    uint256 balance; 
+}
+
+User public admin;  // storage (implicit)
 admin.name = "Alice";  // Permanent
-```
 
 ### Local Variables (Must Specify)
 ```solidity
