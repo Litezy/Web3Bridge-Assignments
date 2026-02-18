@@ -1,4 +1,4 @@
-```markdown
+
 # Solidity Data Locations: Comprehensive Guide
 
 ## Overview
@@ -181,4 +181,3 @@ Solidity's three data locations serve distinct purposes: storage for permanent s
 - **Mappings** are always storage - no keywords, no alternatives, by design
 - The storage/memory distinction determines whether changes persist
 - Mappings can't be in memory because they lack keys, size, and iteration
-```
