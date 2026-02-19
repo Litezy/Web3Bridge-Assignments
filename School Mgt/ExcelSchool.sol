@@ -1,17 +1,18 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.24;
 import "./Events.sol";
-import "../task/IERC20.sol";
+import "../IERC20.sol";
 
 contract ExcelSchool {
-    IERC20 public token;
+    IERC20 token;
     address admin;
 
-    mapping(uint32 => uint256) public levelPrice;
+    mapping(uint => uint256) levelPrice;
     mapping(address => Roles) userRoles;
     mapping(address => bool) public hasClaimed;
-    address public schoolTreasury = address(this);
-    uint256 public faucetAmount = 1000 * 10 ** 18;
+    address  schoolTreasury = address(this);
+    uint  schoolTreasuryBalance = address(this).balance;
+    uint256 faucetAmount = 1000 * 10 ** 18;
 
     constructor(address _token) {
         admin = msg.sender;
@@ -63,7 +64,7 @@ contract ExcelSchool {
         uint id;
         string name;
         address wallet;
-        uint8 level;
+        uint level;
         uint8 age;
         uint amountPaid;
         Status paymentStatus;
@@ -83,13 +84,12 @@ contract ExcelSchool {
         _;
     }
 
-    
     //mappings
-    mapping(address => Student) public studentDetails;
+    mapping(address => Student) studentDetails;
     mapping(address => uint256) lastPaid;
     uint256 constant PAY_INTERVAL = 30 days;
-    mapping(address => Staff) public staffDetails;
-    mapping(address => uint256) public schoolAccount;
+    mapping(address => Staff)  staffDetails;
+    // mapping(address => uint256)  schoolAccount;
 
     //check if paid recently modifier
     modifier checkIfStaffIsPaidRecently(address _staff_wallet) {
@@ -104,14 +104,18 @@ contract ExcelSchool {
     }
 
     //helpers
-    function convertAmount(uint _amount) public pure returns (uint256) {
+    function convertAmount(uint _amount) internal pure returns (uint256) {
         return _amount * 10 ** 18;
     }
 
-    Staff[] public staffList;
-    Student[] public studentList;
+    Staff[]  staffList;
+    Student[] studentList;
 
-    function addStudent(string memory _name,uint8 _level,uint8 _age) public onlyAdmin {
+    function addStudent(
+        string memory _name,
+        uint _level,
+        uint8 _age
+    ) public onlyAdmin {
         require(_level > 0 && levelPrice[_level] > 0, "Invalid Level");
         uint index = studentList.length;
         Student memory newStudent = Student({
@@ -150,7 +154,7 @@ contract ExcelSchool {
 
     function claimStaffId(uint _Id) external {
         require(_Id < staffList.length, "Staff not found");
-
+        require(msg.sender != admin,"Can't be admin");
         Staff storage unClaimedStaff = staffList[_Id];
 
         require(!unClaimedStaff.claimed, "Already claimed");
@@ -158,20 +162,20 @@ contract ExcelSchool {
         unClaimedStaff.wallet = msg.sender;
         unClaimedStaff.claimed = true;
         unClaimedStaff.claimedAt = block.timestamp;
-        staffDetails[unClaimedStaff.wallet];
+        staffDetails[msg.sender];
         userRoles[msg.sender] = Roles.staff;
 
         emit Events.StaffEvent(_Id, unClaimedStaff.wallet);
     }
 
 
-
-//student claim ID
+    //student claim ID
     function claimStudentId(
         uint _Id
     ) external payable onlyStudent(Roles.student) {
         require(_Id < studentList.length, "Student not found");
-        require(hasClaimed[msg.sender],"Claim tokens to pay fees");
+        require(msg.sender != admin,"Can't be admin");
+        require(hasClaimed[msg.sender], "Claim tokens to pay fees");
 
         Student storage student = studentList[_Id];
 
@@ -179,11 +183,6 @@ contract ExcelSchool {
 
         uint fee = convertAmount(levelPrice[student.level]);
         require(fee > 0, "Invalid level");
-
-        require(
-            token.transferFrom(msg.sender, schoolTreasury, fee),
-            "Token transfer failed"
-        );
 
         token.transfer(address(schoolTreasury), fee);
         student.wallet = msg.sender;
@@ -199,8 +198,7 @@ contract ExcelSchool {
         emit Events.StudentClaimEvent(_Id, msg.value, student.wallet);
     }
 
-
-// pay staff
+    // pay staff
     function payStaff(
         address _wallet
     ) external onlyAdmin checkIfStaffIsPaidRecently(_wallet) {
@@ -214,7 +212,7 @@ contract ExcelSchool {
             schoolTreasury.balance >= _staff.salary,
             "Insufficient funds in treasury"
         );
-        IERC20(token).transfer(_wallet, _staff.salary);
+        token.transfer(_wallet, _staff.salary);
         lastPaid[_wallet] = block.timestamp;
         _staff.paid = true;
         _staff.paidAt = block.timestamp;
@@ -243,4 +241,7 @@ contract ExcelSchool {
     }
 
     receive() external payable {}
+
+    // BLZ token smart contract address
+    // 0xE8b1f2C808892667Ac66b55C01bE559E3B15C48D
 }
