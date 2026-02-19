@@ -1,21 +1,34 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.24;
 import "./Events.sol";
+import "../task/IERC20.sol";
 
 contract ExcelSchool {
-    //handle staff
+    IERC20 public token;
     address admin;
 
-    mapping(uint8 => uint256) public levelPrice;
+    mapping(uint32 => uint256) public levelPrice;
     mapping(address => Roles) userRoles;
+    mapping(address => bool) public hasClaimed;
+    address public schoolTreasury = address(this);
+    uint256 public faucetAmount = 1000 * 10 ** 18;
 
-    constructor() {
+    constructor(address _token) {
         admin = msg.sender;
-        levelPrice[1] = 0.014 ether;
-        levelPrice[2] = 0.025 ether;
-        levelPrice[3] = 0.05 ether;
-        levelPrice[4] = 0.09 ether;
+        levelPrice[100] = 100;
+        levelPrice[200] = 200;
+        levelPrice[300] = 300;
+        levelPrice[400] = 400;
+        token = IERC20(_token);
+        IERC20(_token).mint(address(this), 10000000 * 10 ** 18);
         userRoles[admin] = Roles.admin;
+    }
+
+    function claimFaucet(address _to) external {
+        require(_to != address(0), "Not valid address");
+        require(!hasClaimed[_to], "Already claimed tokens");
+        token.mint(_to, faucetAmount);
+        hasClaimed[_to] = true;
     }
 
     modifier onlyAdmin() {
@@ -70,10 +83,10 @@ contract ExcelSchool {
         _;
     }
 
+    
     //mappings
     mapping(address => Student) public studentDetails;
     mapping(address => uint256) lastPaid;
-    uint256 public schoolTreasury;
     uint256 constant PAY_INTERVAL = 30 days;
     mapping(address => Staff) public staffDetails;
     mapping(address => uint256) public schoolAccount;
@@ -86,19 +99,20 @@ contract ExcelSchool {
         );
         uint _now = block.timestamp;
         uint last = lastPaid[_staff_wallet];
-        require(_now < last + PAY_INTERVAL, "Paid recently");
+        require(_now >= last + PAY_INTERVAL, "Paid recently");
         _;
+    }
+
+    //helpers
+    function convertAmount(uint _amount) public pure returns (uint256) {
+        return _amount * 10 ** 18;
     }
 
     Staff[] public staffList;
     Student[] public studentList;
 
-    function addStudent(
-        string memory _name,
-        uint8 _level,
-        uint8 _age
-    ) public onlyAdmin {
-        require(_level > 0 && _level <= 4, "Level Exceeded");
+    function addStudent(string memory _name,uint8 _level,uint8 _age) public onlyAdmin {
+        require(_level > 0 && levelPrice[_level] > 0, "Invalid Level");
         uint index = studentList.length;
         Student memory newStudent = Student({
             id: index,
@@ -117,12 +131,13 @@ contract ExcelSchool {
     }
 
     function addStaff(string memory _name, uint _salary) public onlyAdmin {
+        uint salary = convertAmount(_salary);
         uint _id = staffList.length;
         Staff memory newStaff = Staff({
             id: _id,
             name: _name,
             wallet: address(0),
-            salary: _salary,
+            salary: salary,
             paid: false,
             paidAt: 0,
             role: Roles.staff,
@@ -149,23 +164,31 @@ contract ExcelSchool {
         emit Events.StaffEvent(_Id, unClaimedStaff.wallet);
     }
 
+
+
+//student claim ID
     function claimStudentId(
         uint _Id
     ) external payable onlyStudent(Roles.student) {
         require(_Id < studentList.length, "Student not found");
+        require(hasClaimed[msg.sender],"Claim tokens to pay fees");
 
         Student storage student = studentList[_Id];
 
         require(!student.claimed, "Already claimed");
 
-        uint fee = levelPrice[student.level];
+        uint fee = convertAmount(levelPrice[student.level]);
         require(fee > 0, "Invalid level");
-        require(msg.value == fee, "Wrong amount");
 
-        schoolTreasury = schoolTreasury + msg.value;
+        require(
+            token.transferFrom(msg.sender, schoolTreasury, fee),
+            "Token transfer failed"
+        );
+
+        token.transfer(address(schoolTreasury), fee);
         student.wallet = msg.sender;
 
-        student.amountPaid = msg.value;
+        student.amountPaid = fee;
 
         student.claimed = true;
         student.claimedAt = block.timestamp;
@@ -176,6 +199,8 @@ contract ExcelSchool {
         emit Events.StudentClaimEvent(_Id, msg.value, student.wallet);
     }
 
+
+// pay staff
     function payStaff(
         address _wallet
     ) external onlyAdmin checkIfStaffIsPaidRecently(_wallet) {
@@ -186,10 +211,10 @@ contract ExcelSchool {
         );
         require(_staff.salary > 0, "Salary can't be 0 ether");
         require(
-            schoolTreasury >= _staff.salary,
+            schoolTreasury.balance >= _staff.salary,
             "Insufficient funds in treasury"
         );
-        schoolTreasury -= _staff.salary;
+        IERC20(token).transfer(_wallet, _staff.salary);
         lastPaid[_wallet] = block.timestamp;
         _staff.paid = true;
         _staff.paidAt = block.timestamp;
@@ -197,32 +222,24 @@ contract ExcelSchool {
         require(success);
     }
 
+    //get one student details
     function getStudent(address _wallet) public view returns (Student memory) {
         return studentDetails[_wallet];
     }
 
+    //get one staff details
     function getStaff(address _wallet) public view returns (Staff memory) {
         return staffDetails[_wallet];
     }
 
-    function getAllStaff() public view returns (Staff[] memory) {
-        Staff[] memory allStaff = new Staff[](staffList.length);
-
-        for (uint i = 0; i < staffList.length; i++) {
-            allStaff[i] = staffDetails[staffList[i].wallet];
-        }
-
-        return allStaff;
+    //get all staff details
+    function getAllStaffDetails() public view returns (Staff[] memory) {
+        return staffList;
     }
 
-    function getAllstudentList() public view returns (Student[] memory) {
-         Student[] memory allStudents = new Student[](studentList.length);
-
-        for (uint i = 0; i < studentList.length; i++) {
-            allStudents[i] = studentDetails[studentList[i].wallet];
-        }
-
-        return allStudents;
+    //get all student details
+    function getAllStudentDetails() public view returns (Student[] memory) {
+        return studentList;
     }
 
     receive() external payable {}
