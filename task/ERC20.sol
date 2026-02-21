@@ -3,11 +3,7 @@ pragma solidity ^0.8.24;
 
 contract BelzToken {
     event Transfer(address indexed _from, address indexed _to, uint256 value);
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner,address indexed spender,uint256 value);
 
     string public name;
     string public symbol;
@@ -27,6 +23,8 @@ contract BelzToken {
 
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
+
+
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Only owner can call this function");
@@ -63,9 +61,7 @@ contract BelzToken {
 
     //transfer token
     //Transfer lets us transfer value from address of the caller to the _to address
-    function transfer(
-        address _to,
-        uint256 _amount
+    function transfer(address _to,uint256 _amount
     ) public transferModifier(_amount, _to) returns (bool) {
         balanceOf[msg.sender] -= _amount;
         balanceOf[_to] += _amount;
@@ -84,22 +80,14 @@ contract BelzToken {
     }
 
     //transferFrom function
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public transferFromModifier(_amount, _from, _to) returns (bool success) {
-        uint256 currentAllowance = allowance[_from][msg.sender];
-
-        if (currentAllowance != type(uint256).max) {
-            allowance[_from][msg.sender] = currentAllowance - _amount;
-        }
-
-        balanceOf[_from] -= _amount;
-        balanceOf[_to] += _amount;
-        emit Transfer(_from, _to, _amount);
-        return true;
-    }
+    function transferFrom(address _from, address _to, uint256 _amount) 
+    public transferFromModifier(_amount, _from, _to) returns (bool) {
+    allowance[_from][msg.sender] -= _amount; 
+    balanceOf[_from] -= _amount;
+    balanceOf[_to] += _amount;
+    emit Transfer(_from, _to, _amount);
+    return true;
+}
 
     //get allowance remaining
     function getAllowance(

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: SEE LICENSE IN LICENSE
 pragma solidity ^0.8.24;
 import "./Events.sol";
-import "../IERC20.sol";
+import { IERC20 } from "../task/Interface.sol";
 
 contract ExcelSchool {
     IERC20 token;
@@ -10,8 +10,8 @@ contract ExcelSchool {
     mapping(uint => uint256) levelPrice;
     mapping(address => Roles) userRoles;
     mapping(address => bool) public hasClaimed;
-    address  schoolTreasury = address(this);
-    uint  schoolTreasuryBalance = address(this).balance;
+    address schoolTreasury = address(this);
+    uint schoolTreasuryBalance = address(this).balance;
     uint256 faucetAmount = 1000 * 10 ** 18;
 
     constructor(address _token) {
@@ -88,7 +88,7 @@ contract ExcelSchool {
     mapping(address => Student) studentDetails;
     mapping(address => uint256) lastPaid;
     uint256 constant PAY_INTERVAL = 30 days;
-    mapping(address => Staff)  staffDetails;
+    mapping(address => Staff) staffDetails;
     // mapping(address => uint256)  schoolAccount;
 
     //check if paid recently modifier
@@ -108,7 +108,7 @@ contract ExcelSchool {
         return _amount * 10 ** 18;
     }
 
-    Staff[]  staffList;
+    Staff[] staffList;
     Student[] studentList;
 
     function addStudent(
@@ -154,7 +154,7 @@ contract ExcelSchool {
 
     function claimStaffId(uint _Id) external {
         require(_Id < staffList.length, "Staff not found");
-        require(msg.sender != admin,"Can't be admin");
+        require(msg.sender != admin, "Can't be admin");
         Staff storage unClaimedStaff = staffList[_Id];
 
         require(!unClaimedStaff.claimed, "Already claimed");
@@ -168,13 +168,12 @@ contract ExcelSchool {
         emit Events.StaffEvent(_Id, unClaimedStaff.wallet);
     }
 
-
     //student claim ID
     function claimStudentId(
         uint _Id
     ) external payable onlyStudent(Roles.student) {
         require(_Id < studentList.length, "Student not found");
-        require(msg.sender != admin,"Can't be admin");
+        require(msg.sender != admin, "Can't be admin");
         require(hasClaimed[msg.sender], "Claim tokens to pay fees");
 
         Student storage student = studentList[_Id];
