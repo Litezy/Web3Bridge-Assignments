@@ -183,7 +183,7 @@ contract ExcelSchool {
         uint fee = convertAmount(levelPrice[student.level]);
         require(fee > 0, "Invalid level");
 
-        token.transfer(address(schoolTreasury), fee);
+        
         student.wallet = msg.sender;
 
         student.amountPaid = fee;
@@ -194,6 +194,7 @@ contract ExcelSchool {
         studentDetails[student.wallet];
         userRoles[msg.sender] = Roles.student;
 
+        token.transfer(address(schoolTreasury), fee);
         emit Events.StudentClaimEvent(_Id, msg.value, student.wallet);
     }
 

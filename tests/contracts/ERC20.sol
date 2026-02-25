@@ -18,7 +18,8 @@ contract ERC20 {
     constructor (uint _amount){
         owner = msg.sender;
         total_supply =_amount;
-        balances[owner] = balances[owner] + _amount;
+        balances[owner] =  total_supply;
+        balances[address(this)] = total_supply;
     }
 
     function name() external pure returns (string memory) {
