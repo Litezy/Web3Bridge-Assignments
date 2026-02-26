@@ -93,5 +93,4 @@ contract SaveAssets {
 
     receive() external payable {}
 
-    fallback() external payable {}
 }

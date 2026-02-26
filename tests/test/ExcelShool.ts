@@ -7,7 +7,7 @@ describe("ExcelSchool", function () {
         // Contracts are deployed using the first signer/account by default
         const [owner, secondAccount, studentAccount, staffAccount] = await hre.ethers.getSigners();
 
-        const ERC20Contract = await hre.ethers.getContractFactory("ERC20");
+        const ERC20Contract = await hre.ethers.getContractFactory("MyERC20");
         const erc20Contract = await ERC20Contract.deploy(100000000n);
 
         const SchoolContract = await hre.ethers.getContractFactory("ExcelSchool");

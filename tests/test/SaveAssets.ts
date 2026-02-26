@@ -6,7 +6,7 @@ describe("SaveAssets", function () {
     async function deployAssets() {
         // Contracts are deployed using the first signer/account by default
         const [owner] = await hre.ethers.getSigners();
-        const ERC20Contract = await hre.ethers.getContractFactory("ERC20");
+        const ERC20Contract = await hre.ethers.getContractFactory("MyERC20");
         const erc20Contract = await ERC20Contract.deploy(1000000n);
 
         const AssetsContract = await hre.ethers.getContractFactory("SaveAssets");

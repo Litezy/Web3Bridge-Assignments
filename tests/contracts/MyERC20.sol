@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.3;
 
-contract ERC20 {
+contract MyERC20 {
     string constant NAME = "WEB3CXIV";
     string constant SYMBOL = "CXIV";
     uint8 constant DECIMAL = 18;

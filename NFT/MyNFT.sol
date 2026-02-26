@@ -10,13 +10,9 @@ contract MyNFT is ERC721URIStorage, Ownable {
 
     uint256 private _nextTokenId;
 
-    constructor() ERC721("MBelzNFT", "BLZ") Ownable(msg.sender) {}
+    constructor() ERC721("BelzNFT", "BLZ") Ownable(msg.sender) {}
 
-    function mintNFT(address recipient, string memory tokenURI)
-        public
-        onlyOwner
-        returns (uint256)
-    {
+    function mintNFT(address recipient, string memory tokenURI)public onlyOwner returns (uint256){
         uint256 tokenId = _nextTokenId;
         _nextTokenId++;
 

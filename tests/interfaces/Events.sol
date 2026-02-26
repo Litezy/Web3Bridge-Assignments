@@ -8,4 +8,5 @@ interface Events {
     event PaidStaffEvent(uint256 indexed staffId, uint amount);
     event PropertyEvent(uint256 indexed _propertyId, string _msg);
     event PropertySold(uint256 indexed propId,address _wallet,uint256 indexed _amount);
+    event MintEvent(address _addr,uint256 indexed _amount);
 }

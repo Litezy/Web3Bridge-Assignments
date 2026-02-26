@@ -129,4 +129,6 @@ contract Multisig {
             withdrawEther(transaction.to,transaction.value,transaction.id);
         }
     }
+
+     receive() external payable {}
 }
