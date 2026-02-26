@@ -13,15 +13,15 @@ contract ERC20 {
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
 
-    function name() external view returns (string memory) {
+    function name() external pure returns (string memory) {
         return NAME;
     }
 
-    function symbol() external view returns (string memory) {
+    function symbol() external pure returns (string memory) {
         return SYMBOL;
     }
 
-    function decimals() external view returns (uint8) {
+    function decimals() external pure returns (uint8) {
         return DECIMAL;
     }
 
