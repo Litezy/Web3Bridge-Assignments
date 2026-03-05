@@ -1,0 +1,20 @@
+const { ethers } = require("ethers");
+
+const bytecode = "0x6080604052348015600e575f5ffd5b506040516101ae3803806101ae8339818101604052810190602e9190606b565b805f81905550506091565b5f5ffd5b5f819050919050565b604d81603d565b81146056575f5ffd5b50565b5f815190506065816046565b92915050565b5f60208284031215607d57607c6039565b5b5f6088848285016059565b91505092915050565b6101108061009e5f395ff3fe6080604052348015600e575f5ffd5b50600436106026575f3560e01c806319483cd114602a575b5f5ffd5b60306044565b604051603b91906086565b60405180910390f35b5f5f546040516020016055919060c2565b60405160208183030381529060405280519060200120905090565b5f819050919050565b6080816070565b82525050565b5f60208201905060975f8301846079565b92915050565b5f819050919050565b5f819050919050565b60bc60b882609d565b60a6565b82525050565b5f60cb828460af565b6020820191508190509291505056fea2646970667358221220c9425e7b52f037df2bd8dd19cfbc4de9a3dd18080869576f0770ca3d8c9bd88464736f6c634300081f0033";
+const factoryAddress = "0x9B137463d4E7986D7f535f9B79e28b4EF1938E9b";
+const num = 123456;
+
+const salt = ethers.keccak256(ethers.solidityPacked(["uint256"], [BigInt(num)]));
+
+const initCode = bytecode + ethers.AbiCoder.defaultAbiCoder().encode(["uint256"], [BigInt(num)]).slice(2);
+
+const initCodeHash = ethers.keccak256(initCode);
+const predictedAddress = ethers.getCreate2Address(factoryAddress, salt, initCodeHash);
+
+console.log("initCodeHash:     ", initCodeHash);
+console.log("predictedAddress: ", predictedAddress);
+
+//init codes are provided at runtime
+//creation codes compiled bytecode of smart contracts.
+//init codes are combination of creation codes and any initial values in the contructor args.
+//runtime codes are list of opcodes that run when you interact with the smart contract.

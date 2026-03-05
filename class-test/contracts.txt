@@ -1,4 +1,4 @@
-MyERC20 (BELZ) token contract = 0x0E8ddC72BC0cF27F2a212CCc0a7c4eD6b76e15Fc
+MyERC20 (BELZ) token contract deployed to Lisk Sepolia= 0x0E8ddC72BC0cF27F2a212CCc0a7c4eD6b76e15Fc
 School (ExcelSchool) Management  contract= 0xa5ED7Eb31c8C0f1C7fa4218e347A8d65985484c0
 Todo App contract = 0xfD8be1E634606Ad288A42375398ba5AA66ADeC96
 Save Ether contract = 0x73D1Ddbe061ED802611d9af6E9D88523bFB03325
