@@ -1,3 +1,9 @@
 [submodule "FoundryApp/Multisig/lib/forge-std"]
 	path = FoundryApp/Multisig/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "FactoryVault/lib/forge-std"]
+	path = FactoryVault/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "FactoryVault/lib/openzeppelin-contracts"]
+	path = FactoryVault/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts

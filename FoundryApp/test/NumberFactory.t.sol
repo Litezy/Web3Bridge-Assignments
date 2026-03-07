@@ -11,13 +11,15 @@ contract NumberFactoryTest is Test {
         vm.prank(address(0xdead), address(0xdead));
 
         bytes memory bytecode = type(NumberFactory).creationCode;
+        uint salt = 123456;
         address deployed;
 
         assembly {
-            deployed := create(
+            deployed := create2(
                 0, // ETH value to send
                 add(bytecode, 0x20), // skip the 32-byte length prefix
-                mload(bytecode) // bytecode length
+                mload(bytecode), // bytecode length
+                salt //salt
             )
         }
         require(deployed != address(0), "Deploy failed");
