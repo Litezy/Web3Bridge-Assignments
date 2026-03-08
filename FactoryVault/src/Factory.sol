@@ -3,26 +3,29 @@ pragma solidity ^0.8.28;
 
 import "./interfaces/IVault.sol";
 import "./TokenVault.sol";
-import "lib/openzeppelin-contracts/contracts/utils/Base64.sol";
-import "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 import "./VaultNFT.sol";
 
 contract Factory {
-    using Strings for uint256;
-    using Strings for uint8;
 
+    //events 
+    event VaultCreated(address indexed token, address indexed vault);
+    event NFTMinted(address indexed to, uint256 indexed tokenId, address indexed vault);
+
+    //storage variable declarations
     mapping(address => address) public vaults;
     mapping(uint256 => address) public tokenIdToVault;
 
     VaultNFT public nft;
 
-    event VaultCreated(address indexed token, address indexed vault);
-    event NFTMinted(address indexed to, uint256 indexed tokenId, address indexed vault);
-
+    
     constructor() {
+        // initialize the nft contract, so we can have access to the mint function
         nft = new VaultNFT();
     }
 
+    //depoying Vault function. this:
+    // first of all takes it parameters for vault contract args in the constructor, this should've been dynamic but with create2, we already compute everything needed in order to get a deterministic contract address outcome.
+    // so our vault needs ERC20 token Contract address of a live token, factory address and nftID which is minted on deployment and attched to the vault contract.
     function deployVault(address token) external returns (address vaultAddress) {
         require(vaults[token] == address(0), "Vault already exists for this token");
 
@@ -46,10 +49,12 @@ contract Factory {
         }
 
         require(vaultAddress != address(0), "Vault deployment failed");
-
+       // add the contract address alongside the ERC20 CA passed so as to keep track and prevent double vault on same token.
         vaults[token] = vaultAddress;
+        // track the ID of each deployed vault for a quick lookup.
         tokenIdToVault[nextId] = vaultAddress; 
 
+        //mint and attach an svg NFT to the vault contract address
         nft.mint(vaultAddress);
 
         emit VaultCreated(token, vaultAddress);
